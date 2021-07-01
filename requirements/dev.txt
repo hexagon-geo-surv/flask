@@ -78,7 +78,7 @@ pyparsing==2.4.7
     # via packaging
 pytest==6.2.3
     # via -r requirements/tests.in
-python-dotenv==0.17.1
+python-dotenv==0.18.0
     # via -r requirements/tests.in
 pytz==2021.1
     # via babel
@@ -92,10 +92,6 @@ six==1.15.0
     #   virtualenv
 snowballstemmer==2.1.0
     # via sphinx
-sphinx-issues==1.2.0
-    # via -r requirements/docs.in
-sphinx-tabs==2.1.0
-    # via -r requirements/docs.in
 sphinx==3.5.4
     # via
     #   -r requirements/docs.in
@@ -103,6 +99,10 @@ sphinx==3.5.4
     #   sphinx-issues
     #   sphinx-tabs
     #   sphinxcontrib-log-cabinet
+sphinx-issues==1.2.0
+    # via -r requirements/docs.in
+sphinx-tabs==2.1.0
+    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
