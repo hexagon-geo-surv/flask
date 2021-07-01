@@ -8,7 +8,7 @@ alabaster==0.7.12
     # via sphinx
 appdirs==1.4.4
     # via virtualenv
-asgiref==3.3.4
+asgiref==3.4.0
     # via -r requirements/tests.in
 attrs==20.3.0
     # via pytest
@@ -92,10 +92,6 @@ six==1.15.0
     #   virtualenv
 snowballstemmer==2.1.0
     # via sphinx
-sphinx-issues==1.2.0
-    # via -r requirements/docs.in
-sphinx-tabs==2.1.0
-    # via -r requirements/docs.in
 sphinx==3.5.4
     # via
     #   -r requirements/docs.in
@@ -103,6 +99,10 @@ sphinx==3.5.4
     #   sphinx-issues
     #   sphinx-tabs
     #   sphinxcontrib-log-cabinet
+sphinx-issues==1.2.0
+    # via -r requirements/docs.in
+sphinx-tabs==2.1.0
+    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
