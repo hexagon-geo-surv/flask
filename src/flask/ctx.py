@@ -41,6 +41,24 @@ class _AppCtxGlobals:
         .. versionadded:: 0.10
     """
 
+    # Define attr methods to let mypy know this is a namespace object
+    # that has arbitrary attributes.
+
+    def __getattr__(self, name: str) -> t.Any:
+        try:
+            return self.__dict__[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
+    def __setattr__(self, name: str, value: t.Any) -> None:
+        self.__dict__[name] = value
+
+    def __delattr__(self, name: str) -> None:
+        try:
+            del self.__dict__[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
     def get(self, name: str, default: t.Optional[t.Any] = None) -> t.Any:
         """Get an attribute by name, or a default value. Like
         :meth:`dict.get`.
@@ -78,10 +96,10 @@ class _AppCtxGlobals:
         """
         return self.__dict__.setdefault(name, default)
 
-    def __contains__(self, item: t.Any) -> bool:
+    def __contains__(self, item: str) -> bool:
         return item in self.__dict__
 
-    def __iter__(self) -> t.Iterator:
+    def __iter__(self) -> t.Iterator[str]:
         return iter(self.__dict__)
 
     def __repr__(self) -> str:
@@ -151,7 +169,7 @@ def copy_current_request_context(f: t.Callable) -> t.Callable:
 
     def wrapper(*args, **kwargs):
         with reqctx:
-            return f(*args, **kwargs)
+            return reqctx.app.ensure_sync(f)(*args, **kwargs)
 
     return update_wrapper(wrapper, f)
 
@@ -314,11 +332,29 @@ class RequestContext:
         self._after_request_functions: t.List[AfterRequestCallable] = []
 
     @property
-    def g(self) -> AppContext:
+    def g(self) -> _AppCtxGlobals:
+        import warnings
+
+        warnings.warn(
+            "Accessing 'g' on the request context is deprecated and"
+            " will be removed in Flask 2.2. Access `g` directly or from"
+            "the application context instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return _app_ctx_stack.top.g
 
     @g.setter
-    def g(self, value: AppContext) -> None:
+    def g(self, value: _AppCtxGlobals) -> None:
+        import warnings
+
+        warnings.warn(
+            "Setting 'g' on the request context is deprecated and"
+            " will be removed in Flask 2.2. Set it on the application"
+            " context instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         _app_ctx_stack.top.g = value
 
     def copy(self) -> "RequestContext":
@@ -377,9 +413,6 @@ class RequestContext:
 
         _request_ctx_stack.push(self)
 
-        if self.url_adapter is not None:
-            self.match_request()
-
         # Open the session at the moment that the request context is available.
         # This allows a custom open_session method to use the request context.
         # Only open a new session if this is the first time the request was
@@ -390,6 +423,11 @@ class RequestContext:
 
             if self.session is None:
                 self.session = session_interface.make_null_session(self.app)
+
+        # Match the request URL after loading the session, so that the
+        # session is available in custom URL converters.
+        if self.url_adapter is not None:
+            self.match_request()
 
     def pop(self, exc: t.Optional[BaseException] = _sentinel) -> None:  # type: ignore
         """Pops the request context and unbinds it by doing that.  This will

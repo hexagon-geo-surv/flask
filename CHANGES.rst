@@ -1,9 +1,122 @@
 .. currentmodule:: flask
 
-Version 2.0.0
+Version 2.1.0
 -------------
 
 Unreleased
+
+-   Drop support for Python 3.6. :pr:`4335`
+-   Update Click dependency to >= 8.0. :pr:`4008`
+-   Remove previously deprecated code. :pr:`4337`
+
+    -   The CLI does not pass ``script_info`` to app factory functions.
+    -   ``config.from_json`` is replaced by
+        ``config.from_file(name, load=json.load)``.
+    -   ``json`` functions no longer take an ``encoding`` parameter.
+    -   ``safe_join`` is removed, use ``werkzeug.utils.safe_join``
+        instead.
+    -   ``total_seconds`` is removed, use ``timedelta.total_seconds``
+        instead.
+    -   The same blueprint cannot be registered with the same name. Use
+        ``name=`` when registering to specify a unique name.
+
+-   Some parameters in ``send_file`` and ``send_from_directory`` were
+    renamed in 2.0. The deprecation period for the old names is extended
+    to 2.2. Be sure to test with deprecation warnings visible.
+
+    -   ``attachment_filename`` is renamed to ``download_name``.
+    -   ``cache_timeout`` is renamed to ``max_age``.
+    -   ``add_etags`` is renamed to ``etag``.
+    -   ``filename`` is renamed to ``path``.
+
+-   The ``RequestContext.g`` property is deprecated. Use ``g`` directly
+    or ``AppContext.g`` instead. :issue:`3898`
+-   ``copy_current_request_context`` can decorate async functions.
+    :pr:`4303`
+
+
+Version 2.0.3
+-------------
+
+Unreleased
+
+-   The test client's ``as_tuple`` parameter is deprecated and will be
+    removed in Werkzeug 2.1. It is now also deprecated in Flask, to be
+    removed in Flask 2.1, while remaining compatible with both in
+    2.0.x. Use ``response.request.environ`` instead. :pr:`4341`
+-   Fix type annotation for ``errorhandler`` decorator. :issue:`4295`
+-   Revert a change to the CLI that caused it to hide ``ImportError``
+    tracebacks when importing the application. :issue:`4307`
+
+
+Version 2.0.2
+-------------
+
+Released 2021-10-04
+
+-   Fix type annotation for ``teardown_*`` methods. :issue:`4093`
+-   Fix type annotation for ``before_request`` and ``before_app_request``
+    decorators. :issue:`4104`
+-   Fixed the issue where typing requires template global
+    decorators to accept functions with no arguments. :issue:`4098`
+-   Support View and MethodView instances with async handlers. :issue:`4112`
+-   Enhance typing of ``app.errorhandler`` decorator. :issue:`4095`
+-   Fix registering a blueprint twice with differing names. :issue:`4124`
+-   Fix the type of ``static_folder`` to accept ``pathlib.Path``.
+    :issue:`4150`
+-   ``jsonify`` handles ``decimal.Decimal`` by encoding to ``str``.
+    :issue:`4157`
+-   Correctly handle raising deferred errors in CLI lazy loading.
+    :issue:`4096`
+-   The CLI loader handles ``**kwargs`` in a ``create_app`` function.
+    :issue:`4170`
+-   Fix the order of ``before_request`` and other callbacks that trigger
+    before the view returns. They are called from the app down to the
+    closest nested blueprint. :issue:`4229`
+
+
+Version 2.0.1
+-------------
+
+Released 2021-05-21
+
+-   Re-add the ``filename`` parameter in ``send_from_directory``. The
+    ``filename`` parameter has been renamed to ``path``, the old name
+    is deprecated. :pr:`4019`
+-   Mark top-level names as exported so type checking understands
+    imports in user projects. :issue:`4024`
+-   Fix type annotation for ``g`` and inform mypy that it is a namespace
+    object that has arbitrary attributes. :issue:`4020`
+-   Fix some types that weren't available in Python 3.6.0. :issue:`4040`
+-   Improve typing for ``send_file``, ``send_from_directory``, and
+    ``get_send_file_max_age``. :issue:`4044`, :pr:`4026`
+-   Show an error when a blueprint name contains a dot. The ``.`` has
+    special meaning, it is used to separate (nested) blueprint names and
+    the endpoint name. :issue:`4041`
+-   Combine URL prefixes when nesting blueprints that were created with
+    a ``url_prefix`` value. :issue:`4037`
+-   Roll back a change to the order that URL matching was done. The
+    URL is again matched after the session is loaded, so the session is
+    available in custom URL converters. :issue:`4053`
+-   Re-add deprecated ``Config.from_json``, which was accidentally
+    removed early. :issue:`4078`
+-   Improve typing for some functions using ``Callable`` in their type
+    signatures, focusing on decorator factories. :issue:`4060`
+-   Nested blueprints are registered with their dotted name. This allows
+    different blueprints with the same name to be nested at different
+    locations. :issue:`4069`
+-   ``register_blueprint`` takes a ``name`` option to change the
+    (pre-dotted) name the blueprint is registered with. This allows the
+    same blueprint to be registered multiple times with unique names for
+    ``url_for``. Registering the same blueprint with the same name
+    multiple times is deprecated. :issue:`1091`
+-   Improve typing for ``stream_with_context``. :issue:`4052`
+
+
+Version 2.0.0
+-------------
+
+Released 2021-05-11
 
 -   Drop support for Python 2 and 3.5.
 -   Bump minimum versions of other Pallets projects: Werkzeug >= 2,
@@ -83,6 +196,26 @@ Unreleased
 -   ``helpers.total_seconds()`` is deprecated. Use
     ``timedelta.total_seconds()`` instead. :pr:`3962`
 -   Add type hinting. :pr:`3973`.
+
+
+Version 1.1.4
+-------------
+
+Released 2021-05-13
+
+-   Update ``static_folder`` to use ``_compat.fspath`` instead of
+    ``os.fspath`` to continue supporting Python < 3.6 :issue:`4050`
+
+
+Version 1.1.3
+-------------
+
+Released 2021-05-13
+
+-   Set maximum versions of Werkzeug, Jinja, Click, and ItsDangerous.
+    :issue:`4043`
+-   Re-add support for passing a ``pathlib.Path`` for ``static_folder``.
+    :pr:`3579`
 
 
 Version 1.1.2
