@@ -21,7 +21,7 @@ from .templating import _default_template_ctx_processor
 from .typing import AfterRequestCallable
 from .typing import AppOrBlueprintKey
 from .typing import BeforeRequestCallable
-from .typing import ErrorHandlerCallable
+from .typing import GenericException
 from .typing import TeardownCallable
 from .typing import TemplateContextProcessorCallable
 from .typing import URLDefaultCallable
@@ -29,12 +29,15 @@ from .typing import URLValuePreprocessorCallable
 
 if t.TYPE_CHECKING:
     from .wrappers import Response
+    from .typing import ErrorHandlerCallable
 
 # a singleton sentinel value for parameter defaults
 _sentinel = object()
 
+F = t.TypeVar("F", bound=t.Callable[..., t.Any])
 
-def setupmethod(f: t.Callable) -> t.Callable:
+
+def setupmethod(f: F) -> F:
     """Wraps a method so that it performs a check in debug mode if the
     first request was already handled.
     """
@@ -53,7 +56,7 @@ def setupmethod(f: t.Callable) -> t.Callable:
             )
         return f(self, *args, **kwargs)
 
-    return update_wrapper(wrapper_func, f)
+    return t.cast(F, update_wrapper(wrapper_func, f))
 
 
 class Scaffold:
@@ -89,7 +92,7 @@ class Scaffold:
     def __init__(
         self,
         import_name: str,
-        static_folder: t.Optional[str] = None,
+        static_folder: t.Optional[t.Union[str, os.PathLike]] = None,
         static_url_path: t.Optional[str] = None,
         template_folder: t.Optional[str] = None,
         root_path: t.Optional[str] = None,
@@ -98,7 +101,7 @@ class Scaffold:
         #: to. Do not change this once it is set by the constructor.
         self.import_name = import_name
 
-        self.static_folder = static_folder
+        self.static_folder = static_folder  # type: ignore
         self.static_url_path = static_url_path
 
         #: The path to the templates folder, relative to
@@ -142,7 +145,10 @@ class Scaffold:
         #: directly and its format may change at any time.
         self.error_handler_spec: t.Dict[
             AppOrBlueprintKey,
-            t.Dict[t.Optional[int], t.Dict[t.Type[Exception], ErrorHandlerCallable]],
+            t.Dict[
+                t.Optional[int],
+                t.Dict[t.Type[Exception], "ErrorHandlerCallable[Exception]"],
+            ],
         ] = defaultdict(lambda: defaultdict(dict))
 
         #: A data structure of functions to call at the beginning of
@@ -251,7 +257,7 @@ class Scaffold:
             return None
 
     @static_folder.setter
-    def static_folder(self, value: t.Optional[str]) -> None:
+    def static_folder(self, value: t.Optional[t.Union[str, os.PathLike]]) -> None:
         if value is not None:
             value = os.fspath(value).rstrip(r"\/")
 
@@ -288,7 +294,7 @@ class Scaffold:
 
         self._static_url_path = value
 
-    def get_send_file_max_age(self, filename: str) -> t.Optional[int]:
+    def get_send_file_max_age(self, filename: t.Optional[str]) -> t.Optional[int]:
         """Used by :func:`send_file` to determine the ``max_age`` cache
         value for a given file path if it wasn't passed.
 
@@ -443,7 +449,7 @@ class Scaffold:
         view_func: t.Optional[t.Callable] = None,
         provide_automatic_options: t.Optional[bool] = None,
         **options: t.Any,
-    ) -> t.Callable:
+    ) -> None:
         """Register a rule for routing incoming requests and building
         URLs. The :meth:`route` decorator is a shortcut to call this
         with the ``view_func`` argument. These are equivalent:
@@ -583,10 +589,10 @@ class Scaffold:
         stack of active contexts.  This becomes relevant if you are using
         such constructs in tests.
 
-        Teardown functions must avoid raising exceptions, since they . If they
-        execute code that might fail they
-        will have to surround the execution of these code by try/except
-        statements and log occurring errors.
+        Teardown functions must avoid raising exceptions. If
+        they execute code that might fail they
+        will have to surround the execution of that code with try/except
+        statements and log any errors.
 
         When a teardown function was called because of an exception it will
         be passed an error object.
@@ -641,8 +647,11 @@ class Scaffold:
 
     @setupmethod
     def errorhandler(
-        self, code_or_exception: t.Union[t.Type[Exception], int]
-    ) -> t.Callable:
+        self, code_or_exception: t.Union[t.Type[GenericException], int]
+    ) -> t.Callable[
+        ["ErrorHandlerCallable[GenericException]"],
+        "ErrorHandlerCallable[GenericException]",
+    ]:
         """Register a function to handle errors by code or exception class.
 
         A decorator that is used to register a function given an
@@ -672,7 +681,9 @@ class Scaffold:
                                   an arbitrary exception
         """
 
-        def decorator(f: ErrorHandlerCallable) -> ErrorHandlerCallable:
+        def decorator(
+            f: "ErrorHandlerCallable[GenericException]",
+        ) -> "ErrorHandlerCallable[GenericException]":
             self.register_error_handler(code_or_exception, f)
             return f
 
@@ -681,8 +692,8 @@ class Scaffold:
     @setupmethod
     def register_error_handler(
         self,
-        code_or_exception: t.Union[t.Type[Exception], int],
-        f: ErrorHandlerCallable,
+        code_or_exception: t.Union[t.Type[GenericException], int],
+        f: "ErrorHandlerCallable[GenericException]",
     ) -> None:
         """Alternative error attach function to the :meth:`errorhandler`
         decorator that is more straightforward to use for non decorator
@@ -704,9 +715,11 @@ class Scaffold:
                 f"'{code_or_exception}' is not a recognized HTTP error"
                 " code. Use a subclass of HTTPException with that code"
                 " instead."
-            )
+            ) from None
 
-        self.error_handler_spec[None][code][exc_class] = f
+        self.error_handler_spec[None][code][exc_class] = t.cast(
+            "ErrorHandlerCallable[Exception]", f
+        )
 
     @staticmethod
     def _get_exc_class_and_code(
