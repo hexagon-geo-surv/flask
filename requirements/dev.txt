@@ -92,10 +92,6 @@ six==1.15.0
     #   virtualenv
 snowballstemmer==2.1.0
     # via sphinx
-sphinx-issues==1.2.0
-    # via -r requirements/docs.in
-sphinx-tabs==2.1.0
-    # via -r requirements/docs.in
 sphinx==3.5.4
     # via
     #   -r requirements/docs.in
@@ -103,6 +99,10 @@ sphinx==3.5.4
     #   sphinx-issues
     #   sphinx-tabs
     #   sphinxcontrib-log-cabinet
+sphinx-issues==1.2.0
+    # via -r requirements/docs.in
+sphinx-tabs==2.1.0
+    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
@@ -123,7 +123,7 @@ toml==0.10.2
     #   pre-commit
     #   pytest
     #   tox
-tox==3.23.0
+tox==3.24.5
     # via -r requirements/dev.in
 urllib3==1.26.4
     # via requests
