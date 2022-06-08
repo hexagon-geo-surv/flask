@@ -1,47 +1,61 @@
-AJAX with jQuery
-================
+JavaScript, ``fetch``, and JSON
+===============================
 
-`jQuery`_ is a small JavaScript library commonly used to simplify working
-with the DOM and JavaScript in general.  It is the perfect tool to make
-web applications more dynamic by exchanging JSON between server and
-client.
+You may want to make your HTML page dynamic, by changing data without
+reloading the entire page. Instead of submitting an HTML ``<form>`` and
+performing a redirect to re-render the template, you can add
+`JavaScript`_ that calls `|fetch|`_ and replaces content on the page.
 
-JSON itself is a very lightweight transport format, very similar to how
-Python primitives (numbers, strings, dicts and lists) look like which is
-widely supported and very easy to parse.  It became popular a few years
-ago and quickly replaced XML as transport format in web applications.
+`|fetch|`_ is the modern, built-in JavaScript solution to making
+requests from a page. You may have heard of other "AJAX" methods and
+libraries, such as `|XHR|`_ or `jQuery`_. These are no longer needed in
+modern browsers, although you may choose to use them or another library
+depending on your application's requirements. These docs will only focus
+on built-in JavaScript features.
 
+.. _JavaScript: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+.. |fetch| replace:: ``fetch()``
+.. _fetch: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+.. |XHR| replace:: ``XMLHttpRequest()``
+.. _XHR: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 .. _jQuery: https://jquery.com/
 
-Loading jQuery
---------------
 
-In order to use jQuery, you have to download it first and place it in the
-static folder of your application and then ensure it's loaded.  Ideally
-you have a layout template that is used for all pages where you just have
-to add a script statement to the bottom of your ``<body>`` to load jQuery:
+Rendering Templates
+-------------------
 
-.. sourcecode:: html
 
-   <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+Generating URLs
+---------------
 
-Another method is using Google's `AJAX Libraries API
-<https://developers.google.com/speed/libraries/>`_ to load jQuery:
+The simplest way to generate URLs is to continue to use
+:func:`~flask.url_for` when rendering the template. For example:
 
-.. sourcecode:: html
+.. code-block:: javascript
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="{{
-      url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
+    const user_url = {{ url_for("user", id=current_user.id)|tojson }}
+    fetch(user_url).then(...)
+    // or inline
+    fetch({{ url_for("user", id=current_user.id)|tojson }}).then(...)
 
-In this case you have to put jQuery into your static folder as a fallback, but it will
-first try to load it directly from Google. This has the advantage that your
-website will probably load faster for users if they went to at least one
-other website before using the same jQuery version from Google because it
-will already be in the browser cache.
+However, you might need to generate a URL based on information you only
+know in JavaScript. As discussed above, JavaScript runs in the user's
+browser, not as part of the template rendering, so you can't use
+``url_for`` at that point.
 
-Where is My Site?
------------------
+In this case, you need to know the "root URL" under which your
+application is served. In simple setups, this is ``/``, but it might
+also be something else, like ``https://example.com/myapp``.
+
+A simple way to tell your JavaScript code about this root is to set it
+as a global variable when rendering the template. Then you can use it
+when generating URLs from JavaScript.
+
+.. code-block:: javascript
+
+    const SCRIPT_ROOT = {{ request.script_root|tojson }}
+    let user_id = ...  // do something to get a user id from the page
+    fetch(`${SCRIPT_ROOT}/user/${user_id}`).then(...)
 
 Do you know where your application is?  If you are developing the answer
 is quite simple: it's on localhost port something and directly on the root
@@ -56,11 +70,11 @@ A simple method would be to add a script tag to our page that sets a
 global variable to the prefix to the root of the application.  Something
 like this:
 
-.. sourcecode:: html+jinja
+.. sourcecode:: html
 
-   <script>
-     $SCRIPT_ROOT = {{ request.script_root|tojson }};
-   </script>
+    <script>
+      const SCRIPT_ROOT = {{ request.script_root|tojson }};
+    </script>
 
 
 JSON View Functions
