@@ -31,3 +31,8 @@ source = ["js_example", "tests"]
 
 [tool.ruff]
 src = ["src"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+order-by-type = false
+known-first-party = ["js_example"]
