@@ -15,3 +15,8 @@ name = "task_app"
 
 [tool.ruff]
 src = ["src"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+order-by-type = false
+known-first-party = ["task_app"]

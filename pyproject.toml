@@ -169,6 +169,7 @@ ignore-words-list = "te"
 
 [tool.tox]
 env_list = [
+    "py3.15",
     "py3.14", "py3.14t",
     "py3.13", "py3.12", "py3.11", "py3.10",
     "pypy3.11",
