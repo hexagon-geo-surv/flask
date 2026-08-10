@@ -1,5 +1,4 @@
 import pytest
-from werkzeug.http import parse_set_header
 
 import flask.views
 from flask.testing import FlaskClient
@@ -11,8 +10,8 @@ def common_test(app):
     assert c.get("/").data == b"GET"
     assert c.post("/").data == b"POST"
     assert c.put("/").status_code == 405
-    meths = parse_set_header(c.open("/", method="OPTIONS").headers["Allow"])
-    assert sorted(meths) == ["GET", "HEAD", "OPTIONS", "POST"]
+    meths = c.open("/", method="OPTIONS").allow
+    assert meths == {"GET", "HEAD", "OPTIONS", "POST"}
 
 
 def test_basic_view(app):
@@ -74,8 +73,8 @@ def test_view_inheritance(app, client):
 
     app.add_url_rule("/", view_func=BetterIndex.as_view("index"))
 
-    meths = parse_set_header(client.open("/", method="OPTIONS").headers["Allow"])
-    assert sorted(meths) == ["DELETE", "GET", "HEAD", "OPTIONS", "POST"]
+    meths = client.open("/", method="OPTIONS").allow
+    assert meths == {"DELETE", "GET", "HEAD", "OPTIONS", "POST"}
 
 
 def test_view_decorators(app, client):
