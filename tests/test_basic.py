@@ -7,6 +7,7 @@ import weakref
 from contextlib import nullcontext
 from datetime import datetime
 from datetime import timezone
+from functools import partial
 from platform import python_implementation
 
 import pytest
@@ -52,10 +53,12 @@ def test_options_on_multiple_rules(app, client):
     assert sorted(rv.allow) == ["GET", "HEAD", "OPTIONS", "POST", "PUT"]
 
 
-@pytest.mark.parametrize("method", ["get", "post", "put", "delete", "patch"])
+@pytest.mark.parametrize("method", ["get", "query", "post", "put", "delete", "patch"])
 def test_method_route(app, client, method):
     method_route = getattr(app, method)
-    client_method = getattr(client, method)
+    client_method = getattr(
+        client, method, partial(client.open, method=method.capitalize())
+    )
 
     @method_route("/")
     def hello():

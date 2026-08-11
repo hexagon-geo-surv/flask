@@ -301,6 +301,14 @@ class Scaffold:
         return self._method_route("GET", rule, options)
 
     @setupmethod
+    def query(self, rule: str, **options: t.Any) -> t.Callable[[T_route], T_route]:
+        """Shortcut for :meth:`route` with ``methods=["QUERY"]``.
+
+        .. versionadded:: 3.2
+        """
+        return self._method_route("QUERY", rule, options)
+
+    @setupmethod
     def post(self, rule: str, **options: t.Any) -> t.Callable[[T_route], T_route]:
         """Shortcut for :meth:`route` with ``methods=["POST"]``.
 
