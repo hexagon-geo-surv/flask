@@ -29,6 +29,7 @@ Unreleased
 -   ``Flask.select_jinja_autoescape`` uses case-insensitive comparison instead
     of only lower case file extensions. :pr:`6012`
 -   Fix parsing IPv6 with port in ``run`` and the test client. :pr:`6096`
+-   Add ``app.query`` route decorator for the HTTP QUERY method.
 
 
 Version 3.1.3
