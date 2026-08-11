@@ -1238,10 +1238,10 @@ class Flask(App):
                 A response object is created with the bytes as the body.
 
             ``dict``
-                A dictionary that will be jsonify'd before being returned.
+                Converted to a JSON response.
 
             ``list``
-                A list that will be jsonify'd before being returned.
+                Converted to a JSON response.
 
             ``generator`` or ``iterator``
                 A generator that returns ``str`` or ``bytes`` to be
