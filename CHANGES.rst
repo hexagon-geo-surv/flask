@@ -28,6 +28,7 @@ Unreleased
     it's disabled in config. Previously, only disabling worked. :issue:`5916`
 -   ``Flask.select_jinja_autoescape`` uses case-insensitive comparison instead
     of only lower case file extensions. :pr:`6012`
+-   Fix parsing IPv6 with port in ``run`` and the test client. :pr:`6096`
 
 
 Version 3.1.3
