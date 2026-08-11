@@ -1571,7 +1571,7 @@ Released 2010-06-18, codename Rakia
     that do not pop the request stack for testing.
 -   Because the Python standard library caches loggers, the name of the
     logger is configurable now to better support unittests.
--   Added ``TESTING`` switch that can activate unittesting helpers.
+-   Added ``TESTING`` switch that can activate unit testing helpers.
 -   The logger switches to ``DEBUG`` mode now if debug is enabled.
 
 
@@ -1607,7 +1607,7 @@ Released 2010-05-28, codename Schnaps
 Version 0.2
 -----------
 
-Released 2010-05-12, codename J?germeister
+Released 2010-05-12, codename Jägermeister
 
 -   Various bugfixes
 -   Integrated JSON support
